@@ -3,7 +3,7 @@
     "heroTitle": "I build things that work.",
     "heroSubtitle": "Full-Stack & Cloud Developer based in Kerala, India. Specializing in Java, Spring Boot microservices, Angular/React, and AWS cloud engineering — building scalable, high-throughput systems that deliver measurable business outcomes.",
     "backgroundParagraphs": [
-      "With over 4+ years of professional engineering experience across global enterprise leaders like IBM and Tata Consultancy Services (TCS), I specialize in architecting distributed backend services, cloud-native deployments, and modern front-end experiences.",
+      "With over 5+ years of professional engineering experience across global enterprise leaders like IBM and Tata Consultancy Services (TCS), I specialize in architecting distributed backend services, cloud-native deployments, and modern front-end experiences.",
       "I have led cross-functional engineering teams, spearheaded large-scale legacy to cloud modernization initiatives (cutting operational costs by 40%), and engineered resilient messaging pipelines using Kafka and TIBCO EMS.",
       "Beyond enterprise engineering, I conducted computational thermodynamics research on carbon dioxide capture published in Springer Nature, and actively volunteer with NGOs to empower underprivileged children through education."
     ]
@@ -43,19 +43,58 @@
   "skillCategories": [
     {
       "title": "Back-End & Microservices",
-      "skills": ["Java", "Spring Boot", "Microservices", "Kafka", "TIBCO EMS", "JMS", "REST APIs", "Maven / Gradle", "NoSQL", "SQL"]
+      "skills": [
+        "Java",
+        "Spring Boot",
+        "Microservices",
+        "Kafka",
+        "TIBCO EMS",
+        "JMS",
+        "REST APIs",
+        "Maven / Gradle",
+        "NoSQL",
+        "SQL"
+      ]
     },
     {
       "title": "Front-End",
-      "skills": ["Angular", "React", "TypeScript", "JavaScript", "MEAN Stack", "MERN Stack", "HTML5 / CSS3", "Bootstrap", "Tailwind CSS"]
+      "skills": [
+        "Angular",
+        "React",
+        "TypeScript",
+        "JavaScript",
+        "MEAN Stack",
+        "MERN Stack",
+        "HTML5 / CSS3",
+        "Bootstrap",
+        "Tailwind CSS"
+      ]
     },
     {
       "title": "Cloud & DevOps",
-      "skills": ["AWS (ECS, SQS, S3, Lambda, CloudWatch)", "Terraform", "Docker", "Jenkins (CI/CD)", "Azure VMSS / Service Bus", "Git / Bitbucket", "Tomcat"]
+      "skills": [
+        "AWS (ECS, SQS, S3, Lambda, CloudWatch)",
+        "Terraform",
+        "Docker",
+        "Jenkins (CI/CD)",
+        "Azure VMSS / Service Bus",
+        "Git / Bitbucket",
+        "Tomcat"
+      ]
     },
     {
       "title": "Data, Security & Tools",
-      "skills": ["PostgreSQL", "SQL Server", "Synopsys (Black Duck, Seeker)", "Postman", "DBeaver", "Tableau", "Informatica", "Linux / Putty", "Prompt Engineering"]
+      "skills": [
+        "PostgreSQL",
+        "SQL Server",
+        "Synopsys (Black Duck, Seeker)",
+        "Postman",
+        "DBeaver",
+        "Tableau",
+        "Informatica",
+        "Linux / Putty",
+        "Prompt Engineering"
+      ]
     }
   ],
   "experiences": [
@@ -71,7 +110,14 @@
         "Contributed to core microservices using Java, Spring Boot, and Angular — implementing high-throughput features and maintaining production services.",
         "Engineered cloud infrastructure using Terraform scripts and AWS cloud-native services including SQS, ECS, S3, Lambda, and CloudWatch for building, deploying, and real-time monitoring."
       ],
-      "techStack": ["Java", "Spring Boot", "Angular", "AWS (SQS, ECS, S3, Lambda, CloudWatch)", "Terraform", "Datalogics"]
+      "techStack": [
+        "Java",
+        "Spring Boot",
+        "Angular",
+        "AWS (SQS, ECS, S3, Lambda, CloudWatch)",
+        "Terraform",
+        "Datalogics"
+      ]
     },
     {
       "company": "TATA Consultancy Services (TCS)",
@@ -85,7 +131,20 @@
         "Integrated enterprise messaging backbones (Apache Kafka, TIBCO EMS, Azure Service Bus) for asynchronous inter-service communication and event-driven architectures.",
         "Built automated CI/CD deployment pipelines using Jenkins and Docker on Azure VMSS, drastically shortening release lead times."
       ],
-      "techStack": ["Java", "Spring Boot", "Microservices", "React", "Angular", "Kafka", "TIBCO EMS", "PostgreSQL", "SQL Server", "Docker", "Azure VMSS", "Jenkins"]
+      "techStack": [
+        "Java",
+        "Spring Boot",
+        "Microservices",
+        "React",
+        "Angular",
+        "Kafka",
+        "TIBCO EMS",
+        "PostgreSQL",
+        "SQL Server",
+        "Docker",
+        "Azure VMSS",
+        "Jenkins"
+      ]
     }
   ],
   "featuredProjects": [
@@ -98,7 +157,15 @@
       "isFeatured": true,
       "subtitle": "High-performance storefront and microservices backend with role-based order tracking",
       "description": "Built a complete end-to-end e-commerce platform featuring an event-driven Java & Spring Boot microservices backend paired with a dynamic MEAN/React front-end. Includes token-based JWT authentication, custom order pipeline, administrative management console, and automated inventory sync with PostgreSQL.",
-      "tags": ["Java", "Spring Boot", "Microservices", "MEAN / React", "PostgreSQL", "JWT", "Docker"],
+      "tags": [
+        "Java",
+        "Spring Boot",
+        "Microservices",
+        "MEAN / React",
+        "PostgreSQL",
+        "JWT",
+        "Docker"
+      ],
       "clientText": "Production Application",
       "repoText": "Private Repo",
       "isPrivate": true
@@ -112,7 +179,14 @@
       "isFeatured": true,
       "subtitle": "Transitioning enterprise mortgage document rendering from iText to Datalogics on AWS",
       "description": "Spearheaded the technical feasibility, architectural redesign, and POC for replacing legacy iText PDF rendering with Datalogics. Automated cloud provisioning via Terraform and integrated AWS SQS & ECS workers for distributed document processing under high concurrent load.",
-      "tags": ["Java", "Spring Boot", "AWS (SQS, ECS, S3)", "Terraform", "Datalogics", "Angular"],
+      "tags": [
+        "Java",
+        "Spring Boot",
+        "AWS (SQS, ECS, S3)",
+        "Terraform",
+        "Datalogics",
+        "Angular"
+      ],
       "clientText": "IBM / Freedom Mortgage",
       "repoText": "Enterprise Codebase",
       "isPrivate": true
@@ -127,7 +201,13 @@
       "year": "2024",
       "subtitle": "Distributed messaging system with Apache Kafka, TIBCO EMS & Azure Service Bus",
       "description": "Architected resilient asynchronous messaging conduits enabling seamless inter-application communication, high message durability, and distributed transaction handling across disparate enterprise services.",
-      "tags": ["Apache Kafka", "TIBCO EMS", "Azure Service Bus", "Spring Boot", "Docker"],
+      "tags": [
+        "Apache Kafka",
+        "TIBCO EMS",
+        "Azure Service Bus",
+        "Spring Boot",
+        "Docker"
+      ],
       "clientText": "TCS Enterprise Systems",
       "isPrivate": true
     },
@@ -139,7 +219,13 @@
       "year": "2023",
       "subtitle": "Role-based workforce management and tracking system built with MERN stack",
       "description": "Full-stack management solution with hierarchical role permissions, comprehensive employee directory, department budgeting, performance audits, and RESTful API back-end.",
-      "tags": ["React", "Node.js", "Express", "MongoDB", "REST API"],
+      "tags": [
+        "React",
+        "Node.js",
+        "Express",
+        "MongoDB",
+        "REST API"
+      ],
       "clientText": "Self Project",
       "isPrivate": true
     },
@@ -151,7 +237,13 @@
       "year": "2023",
       "subtitle": "Dynamic background workflow and notification scheduler with Angular & Spring Boot",
       "description": "Task management platform with automated background cron schedulers, dynamic real-time theme shifts, and custom email/in-app notification alerts for mission-critical deadlines.",
-      "tags": ["Angular", "Spring Boot", "Java", "JMS", "PostgreSQL"],
+      "tags": [
+        "Angular",
+        "Spring Boot",
+        "Java",
+        "JMS",
+        "PostgreSQL"
+      ],
       "clientText": "Self Project",
       "isPrivate: true": true
     },
@@ -163,7 +255,12 @@
       "year": "2021",
       "subtitle": "Published Springer Nature paper: CO2 emission reduction using Zeolites with OpenMD",
       "description": "Conducted computational research on carbon dioxide emission reduction in internal combustion engines using ZSM-5 Zeolites. Formulated complex simulation models using Python and the OpenMD molecular dynamics engine. Published under Springer Nature.",
-      "tags": ["Python", "OpenMD", "Data Analysis", "Springer Nature"],
+      "tags": [
+        "Python",
+        "OpenMD",
+        "Data Analysis",
+        "Springer Nature"
+      ],
       "clientText": "Springer Nature Publication",
       "publication": {
         "publisher": "Springer Nature",
