@@ -1,15 +1,49 @@
 import React, { useState } from 'react';
 import { usePortfolio } from '../context/usePortfolio';
-import { Lock, Key, CheckCircle2, AlertCircle, X } from 'lucide-react';
+import { Lock, Key, CheckCircle2, AlertCircle, X, ShieldCheck } from 'lucide-react';
 
 interface SecretAuthModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Hash the user's input with SHA-256 and return a hex string
+async function sha256(text: string): Promise<string> {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+const ADMIN_HASH = import.meta.env.VITE_ADMIN_HASH as string | undefined;
+
 export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClose }) => {
   const { setIsEditMode, ghConfig, setGhConfig, syncFromGitHub } = usePortfolio();
 
+  // ── Password gate ────────────────────────────────────────────────────────────
+  const [unlocked,    setUnlocked]    = useState(false);
+  const [password,    setPassword]    = useState('');
+  const [pwError,     setPwError]     = useState('');
+  const [pwChecking,  setPwChecking]  = useState(false);
+
+  const handlePasswordSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!ADMIN_HASH) {
+      // No hash configured — env var missing, deny access
+      setPwError('Admin access is not configured on this deployment.');
+      return;
+    }
+    setPwChecking(true);
+    const hash = await sha256(password);
+    setPwChecking(false);
+    if (hash === ADMIN_HASH) {
+      setUnlocked(true);
+      setPwError('');
+    } else {
+      setPwError('Incorrect password.');
+      setPassword('');
+    }
+  };
+
+  // ── GitHub config form state ─────────────────────────────────────────────────
   const [token, setToken] = useState(ghConfig?.token || '');
   const [owner, setOwner] = useState(ghConfig?.owner || 'DitRS');
   const [repo, setRepo] = useState(ghConfig?.repo || 'Portfolio');
@@ -54,6 +88,56 @@ export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClos
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
       <div className="relative max-w-md w-full bg-[#10121a] border border-[#272c40] rounded-2xl p-6 md:p-8 shadow-2xl space-y-6">
+
+        {/* ── Password gate — shown before GitHub config ── */}
+        {!unlocked ? (
+          <>
+            {/* Close */}
+            <button onClick={onClose} className="absolute top-4 right-4 text-[#8a91a6] hover:text-white p-1 rounded-lg bg-[#181a24] border border-[#282d3f] transition-colors">
+              <X size={16} />
+            </button>
+
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0">
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <h3 className="font-heading text-xl font-bold text-white tracking-tight">Admin Access</h3>
+                <p className="text-xs text-[#7d859b]">Enter your admin password to continue</p>
+              </div>
+            </div>
+
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-bold tracking-wider uppercase text-[#71788f]">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  autoFocus
+                  value={password}
+                  onChange={e => { setPassword(e.target.value); setPwError(''); }}
+                  placeholder="••••••••••••"
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#141622] border border-[#24283c] focus:border-[#3b82f6] text-white text-xs outline-none transition-all placeholder-[#404558]"
+                />
+                {pwError && (
+                  <p className="text-xs text-red-400 flex items-center gap-1.5 pt-0.5">
+                    <AlertCircle size={12} /> {pwError}
+                  </p>
+                )}
+              </div>
+              <button
+                type="submit"
+                disabled={!password || pwChecking}
+                className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition-all shadow-lg shadow-blue-500/20 active:scale-[0.98] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {pwChecking ? 'Verifying…' : 'Continue'}
+              </button>
+            </form>
+          </>
+        ) : (
+          /* ── GitHub config form — only shown after password passes ── */
+          <>
         {/* Close */}
         <button
           onClick={onClose}
@@ -196,6 +280,8 @@ export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClos
             </button>
           </div>
         </form>
+          </>
+        )}
       </div>
     </div>
   );
