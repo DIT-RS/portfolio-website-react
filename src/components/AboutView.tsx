@@ -288,10 +288,6 @@ export const AboutView: React.FC<AboutViewProps> = ({ onNavigateToContact, onNav
                 <h4 className="font-heading text-lg font-bold text-white mb-1">{edu.degree}</h4>
                 <p className="text-xs text-[#8890a5] mb-3">{edu.institution}</p>
               </div>
-              <div className="pt-3 border-t border-[#1c202d] flex items-center justify-between text-xs text-[#6e758a]">
-                <span>Academic Score</span>
-                <span className="font-bold text-emerald-400">{edu.score}</span>
-              </div>
             </div>
           ))}
         </div>
