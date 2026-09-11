@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { PortfolioProvider } from './context/PortfolioContext';
+import { ThemeProvider } from './context/ThemeContext';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { WorkView } from './components/WorkView';
 import { AboutView } from './components/AboutView';
 import { ContactView } from './components/ContactView';
 import { AdminToolbar } from './components/AdminToolbar';
+import { SnakeGame } from './components/SnakeGame';
 
 function PortfolioApp() {
   const [activeTab, setActiveTab] = useState<'work' | 'about' | 'contact'>('about');
@@ -33,6 +35,9 @@ function PortfolioApp() {
 
   return (
     <div className="min-h-screen flex flex-col bg-[#0b0c10] text-[#a0a5b5] bg-grid-pattern relative selection:bg-blue-600 selection:text-white">
+      {/* Snake game in gutters — desktop only */}
+      <SnakeGame />
+
       {/* Subtle background ambient light */}
       <div className="fixed top-0 left-1/2 -translate-x-1/2 w-[800px] h-[300px] bg-blue-600/5 blur-[120px] pointer-events-none rounded-full"></div>
 
@@ -64,9 +69,11 @@ function PortfolioApp() {
 
 export function App() {
   return (
-    <PortfolioProvider>
-      <PortfolioApp />
-    </PortfolioProvider>
+    <ThemeProvider>
+      <PortfolioProvider>
+        <PortfolioApp />
+      </PortfolioProvider>
+    </ThemeProvider>
   );
 }
 
