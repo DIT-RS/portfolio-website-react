@@ -83,7 +83,7 @@ export const educationList: EducationItem[] = [
   {
     institution: 'Mar Baselios College of Engineering & Technology (Autonomous)',
     degree: 'B.Tech in Mechanical Engineering',
-    period: 'Aug 2017 – Jul 2021',
+    period: 'Aug 2017 - Jul 2021',
     score: '79.9%',
   },
 ];
@@ -99,7 +99,7 @@ export const defaultPortfolioContent: PortfolioContent = {
   bio: {
     heroTitle: 'I build things that work.',
     heroSubtitle:
-      'Full-Stack & Cloud Developer based in Kerala, India. Specializing in Java, Spring Boot microservices, Angular/React, and AWS cloud engineering — building scalable, high-throughput systems that deliver measurable business outcomes.',
+      'Full-Stack & Cloud Developer based in Kerala, India. Specializing in Java, Spring Boot microservices, Angular/React, and AWS cloud engineering -- building scalable, high-throughput systems that deliver measurable business outcomes.',
     backgroundParagraphs: [
       'With over 4+ years of professional engineering experience across global enterprise leaders like IBM and Tata Consultancy Services (TCS), I specialize in architecting distributed backend services, cloud-native deployments, and modern front-end experiences.',
       'I have led cross-functional engineering teams, spearheaded large-scale legacy to cloud modernization initiatives (cutting operational costs by 40%), and engineered resilient messaging pipelines using Kafka and TIBCO EMS.',
@@ -121,25 +121,25 @@ export const defaultPortfolioContent: PortfolioContent = {
       number: '01',
       title: 'Clarity first',
       description:
-        'I ask the hard questions upfront so we don’t build the wrong thing. Clear requirements save weeks of rework.',
+        "I ask the hard questions upfront so we don't build the wrong thing. Clear requirements save weeks of rework.",
     },
     {
       number: '02',
       title: 'Ship fast, iterate',
       description:
-        'I believe in getting working software in front of users quickly, then improving based on real feedback — not assumptions.',
+        "I believe in getting working software in front of users quickly, then improving based on real feedback - not assumptions.",
     },
     {
       number: '03',
       title: 'Own the outcome',
       description:
-        'I treat every project like it’s my own. If something isn’t working, I say so — and I fix it.',
+        "I treat every project like it's my own. If something isn't working, I say so -- and I fix it.",
     },
     {
       number: '04',
       title: 'Write for humans',
       description:
-        'Code is read far more than it’s written. I write clean, documented, maintainable code that your future self will thank you for.',
+        "Code is read far more than it's written. I write clean, documented, maintainable code that your future self will thank you for.",
     },
   ],
   skillCategories: [
@@ -164,13 +164,13 @@ export const defaultPortfolioContent: PortfolioContent = {
     {
       company: 'IBM',
       role: 'Application Developer',
-      period: 'Aug 2025 – Present',
+      period: 'Aug 2025 - Present',
       location: 'Kochi, Kerala, India',
-      client: 'Freedom Mortgage (Oct ’25 – Present)',
+      client: "Freedom Mortgage (Oct '25 - Present)",
       points: [
         'Conducted technical feasibility analysis, effort estimation, and migration planning for transitioning PDF processing from iText to Datalogics, including core code refactoring.',
         'Built a proof-of-concept sample project and authored reference architecture documentation/code to accelerate smooth adoption across engineering teams.',
-        'Contributed to core microservices using Java, Spring Boot, and Angular — implementing high-throughput features and maintaining production services.',
+        'Contributed to core microservices using Java, Spring Boot, and Angular -- implementing high-throughput features and maintaining production services.',
         'Engineered cloud infrastructure using Terraform scripts and AWS cloud-native services including SQS, ECS, S3, Lambda, and CloudWatch for building, deploying, and real-time monitoring.',
       ],
       techStack: ['Java', 'Spring Boot', 'Angular', 'AWS (SQS, ECS, S3, Lambda, CloudWatch)', 'Terraform', 'Datalogics'],
@@ -178,7 +178,7 @@ export const defaultPortfolioContent: PortfolioContent = {
     {
       company: 'TATA Consultancy Services (TCS)',
       role: 'Java Full Stack Developer (Systems Engineer)',
-      period: 'Jul 2021 – Aug 2025',
+      period: 'Jul 2021 - Aug 2025',
       location: 'Trivandrum, Kerala, India',
       points: [
         'Led an engineering team of 5 developers, spearheading the design, development, and delivery of enterprise full-stack web applications with strong back-end focus.',
