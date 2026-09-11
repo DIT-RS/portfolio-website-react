@@ -270,7 +270,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ onNavigateToContact, onNav
       </section>
 
       {/* Education & Certifications */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* Education */}
         <div className="space-y-4">
           <div className="flex items-center gap-2 text-[#3b82f6] text-xs font-semibold tracking-wider uppercase">
@@ -281,7 +281,7 @@ export const AboutView: React.FC<AboutViewProps> = ({ onNavigateToContact, onNav
           {educationList.map((edu) => (
             <div
               key={edu.degree}
-              className="rounded-2xl bg-[#11131a]/80 border border-[#1f2333] p-6 backdrop-blur-sm h-full flex flex-col justify-between"
+              className="rounded-2xl bg-[#11131a]/80 border border-[#1f2333] p-6 backdrop-blur-sm flex flex-col justify-between"
             >
               <div>
                 <span className="inline-block text-xs font-medium text-[#737b92] mb-2">{edu.period}</span>
