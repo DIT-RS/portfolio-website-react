@@ -266,6 +266,9 @@ const GAMES = [
   { id: 'sudoku', label: 'Sudoku', pw: 236 },
 ];
 
+const TAB_MS = 300;
+const TAB_EASE = 'cubic-bezier(0.4,0,0.2,1)';
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function SnakeGame() {
@@ -456,6 +459,15 @@ export function SnakeGame() {
 
   return (
     <>
+      {/* Shared by both layouts; the hover rules below are desktop-only */}
+      <style>{`
+        @keyframes dot-pulse {
+          0%, 100% { opacity: 0.3;  box-shadow: 0 0 2px rgba(59,130,246,0.15); }
+          50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
+        }
+        .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
+      `}</style>
+
       {/* ════════════════════════════════════════════════════════════
           MOBILE — bottom sheet
       ════════════════════════════════════════════════════════════ */}
@@ -501,43 +513,59 @@ export function SnakeGame() {
             </div>
           </div>
 
-          {/* Floating trigger — pill when closed, minimal dot-circle when open */}
+          {/* Floating trigger — pill when closed, dot-circle when open */}
           <button
             onClick={() => setOpen(o => !o)}
             aria-label={open ? 'Close games' : 'Open games'}
+            aria-expanded={open}
             className="game-tab"
             style={{
               position: 'fixed',
-              bottom: open ? 8 : 20,
-              right: open ? 8 : 16,
+              bottom: open ? 10 : 20,
+              right: open ? 10 : 16,
               zIndex: 10000,
               pointerEvents: 'auto',
               display: 'flex', flexDirection: 'row', alignItems: 'center',
-              gap: open ? 0 : 6,
-              padding: open ? '8px' : '8px 14px',
+              justifyContent: 'center',
+              gap: open ? 0 : 8,
+              // Explicit height keeps the open state a true circle: the collapsed
+              // label is still in flow and is taller than the dot.
+              boxSizing: 'border-box',
+              height: open ? 40 : 46,
+              padding: open ? '0 14px' : '0 20px',
               background: open ? 'rgba(59,130,246,0.15)' : T.tabBg,
               border: `1px solid ${open ? 'rgba(59,130,246,0.5)' : T.tabBorderColor}`,
               borderRadius: 40, cursor: 'pointer', outline: 'none',
               boxShadow: open ? '0 2px 12px rgba(59,130,246,0.35)' : '0 4px 16px rgba(0,0,0,0.25)',
-              transition: 'all 280ms cubic-bezier(0.4,0,0.2,1)',
+              transition: `padding ${TAB_MS}ms ${TAB_EASE}, gap ${TAB_MS}ms ${TAB_EASE}, height ${TAB_MS}ms ${TAB_EASE}, bottom ${TAB_MS}ms ${TAB_EASE}, right ${TAB_MS}ms ${TAB_EASE}, background 280ms ease, border-color 280ms ease, box-shadow 280ms ease`,
               overflow: 'hidden',
-              width: open ? 36 : undefined,
-              height: open ? 36 : undefined,
-              justifyContent: 'center',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <span className={`game-tab-dot${open ? '' : ' game-tab-dot-pulse'}`} style={{
               display: 'block', flexShrink: 0,
-              width: open ? 10 : 6, height: open ? 10 : 6,
+              width: 10, height: 10,
               borderRadius: '50%',
               background: open ? '#3b82f6' : T.tabDotBase,
               boxShadow: open ? '0 0 10px rgba(59,130,246,0.9)' : '0 0 5px rgba(59,130,246,0.3)',
-              transition: 'all 280ms ease',
+              transition: 'background 280ms ease, box-shadow 280ms ease',
             }} />
-            {!open && <>
-              <span className="game-tab-label" style={{ fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.tabLabel, writingMode: 'horizontal-tb', transform: 'none', transition: 'color 300ms' }}>games</span>
-              <span className="game-tab-chevron" style={{ color: T.tabChevron, fontSize: 11, lineHeight: 1, transition: 'transform 300ms ease, color 300ms', transform: 'rotate(-90deg)' }}>‹</span>
-            </>}
+            {/* 0fr/1fr collapses to the label's exact width, which max-width cannot do */}
+            <span style={{
+              display: 'grid',
+              gridTemplateColumns: open ? '0fr' : '1fr',
+              transition: `grid-template-columns ${TAB_MS}ms ${TAB_EASE}`,
+            }}>
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                minWidth: 0, overflow: 'hidden',
+                opacity: open ? 0 : 1,
+                transition: `opacity ${open ? 140 : 220}ms ease`,
+              }}>
+                <span className="game-tab-label" style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.tabLabel, whiteSpace: 'nowrap', transition: 'color 300ms' }}>games</span>
+                <span className="game-tab-chevron" style={{ color: T.tabChevron, fontSize: 13, lineHeight: 1, transform: 'rotate(-90deg)', transition: 'color 300ms' }}>‹</span>
+              </span>
+            </span>
           </button>
         </>
       )}
@@ -572,7 +600,8 @@ export function SnakeGame() {
         </div>
       </div>
 
-      {/* Hover + animation styles */}
+
+      {/* Hover styles */}
       <style>{`
         .game-tab:hover {
           background: ${light ? '#d8dcee' : '#141c30'} !important;
@@ -587,11 +616,6 @@ export function SnakeGame() {
           background: #3b82f6 !important;
           box-shadow: 0 0 10px rgba(59,130,246,0.9) !important;
         }
-        @keyframes dot-pulse {
-          0%, 100% { opacity: 0.3;  box-shadow: 0 0 2px rgba(59,130,246,0.15); }
-          50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
-        }
-        .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
       `}</style>
 
       {/* ── Collapsed tab ── */}
