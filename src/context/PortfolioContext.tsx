@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { PortfolioContent } from '../data/portfolioData';
 import { defaultPortfolioContent } from '../data/portfolioData';
 import type { GitHubConfig } from '../services/githubService';
@@ -24,26 +24,6 @@ export const PortfolioProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState<boolean>(false);
   const [ghConfig, setGhConfigState] = useState<GitHubConfig | null>(getSavedGitHubConfig);
-
-  // Load public/portfolio-data.json on first mount if available
-  useEffect(() => {
-    fetch('/portfolio-data.json')
-      .then((res) => {
-        if (res.ok) return res.json();
-        throw new Error('Not found');
-      })
-      .then((data: PortfolioContent) => {
-        setContent(() => {
-          const cached = getCachedContent();
-          if (cached) return cached;
-          setOriginalContent(data);
-          return data;
-        });
-      })
-      .catch(() => {
-        // Fallback to embedded default data
-      });
-  }, []);
 
   const setGhConfig = (config: GitHubConfig | null) => {
     if (config) {
