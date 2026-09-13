@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { SudokuGame } from './SudokuGame';
 import { useTheme } from '../context/ThemeContext';
 
@@ -266,6 +267,20 @@ const GAMES = [
   { id: 'sudoku', label: 'Sudoku', pw: 236 },
 ];
 
+const TAB_MS = 300;
+const TAB_EASE = 'cubic-bezier(0.4,0,0.2,1)';
+
+const SHEET_MS = 340;        // sheet and backdrop must share this to move as one
+const SHEET_EASE = 'cubic-bezier(0.4,0,0.2,1)';
+const SHEET_MAX_PULL = 28;   // ceiling on the upward stretch
+const SHEET_DISMISS_PX = 90;
+const SHEET_FLICK_V = 0.5;   // px/ms
+const SHEET_SPRING = 'cubic-bezier(0.34,1.56,0.64,1)';
+
+// Asymptotic resistance: the sheet never rises past SHEET_MAX_PULL, so pulling
+// up reads as "this does not open further" rather than as a stuck drag.
+const resistPull = (d: number) => (d * SHEET_MAX_PULL) / (d + SHEET_MAX_PULL);
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function SnakeGame() {
@@ -286,6 +301,57 @@ export function SnakeGame() {
   }, []);
 
   const handleClose = () => { setOpen(false); resetToIdle(); };
+
+  // ── Bottom-sheet drag ────────────────────────────────────────────────────────
+  // Written straight to the DOM: the sheet wraps a running canvas, so a state
+  // update per pointermove would re-render the game on every frame of the drag.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, startY: 0, lastY: 0, lastT: 0, dy: 0, v: 0 });
+
+  const onHandleDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    d.active = true; d.startY = e.clientY; d.lastY = e.clientY; d.lastT = e.timeStamp; d.dy = 0; d.v = 0;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    sheetRef.current?.classList.add('sheet-dragging');
+    backdropRef.current?.classList.add('sheet-dragging');
+  };
+
+  const onHandleMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d.active) return;
+    const dt = e.timeStamp - d.lastT;
+    if (dt > 0) d.v = (e.clientY - d.lastY) / dt;
+    d.lastY = e.clientY; d.lastT = e.timeStamp;
+    d.dy = e.clientY - d.startY;
+    const down = d.dy >= 0;
+    if (sheetRef.current) sheetRef.current.style.transform = `translateY(${down ? d.dy : 0}px)`;
+    if (panelRef.current) panelRef.current.style.paddingBottom = `${down ? 0 : resistPull(-d.dy)}px`;
+    // Dim in step with how far the sheet has been pulled away, or the backdrop
+    // would sit at full strength until the drag ends.
+    if (backdropRef.current && panelRef.current) {
+      const travel = panelRef.current.getBoundingClientRect().height || 1;
+      backdropRef.current.style.opacity = String(down ? Math.max(0, 1 - d.dy / travel) : 1);
+    }
+  };
+
+  const endHandleDrag = (e: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
+    const d = dragRef.current;
+    if (!d.active) return;
+    d.active = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    sheetRef.current?.classList.remove('sheet-dragging');
+    backdropRef.current?.classList.remove('sheet-dragging');
+    if (panelRef.current) panelRef.current.style.paddingBottom = '0px';
+    const dismiss = !cancelled && (d.dy > SHEET_DISMISS_PX || (d.dy > 16 && d.v > SHEET_FLICK_V));
+    if (dismiss) {
+      handleClose();
+    } else {
+      if (sheetRef.current) sheetRef.current.style.transform = 'translateY(0px)';
+      if (backdropRef.current) backdropRef.current.style.opacity = '1';
+    }
+  };
   const prevGame = () => { resetToIdle(); setGameIdx(i => (i - 1 + GAMES.length) % GAMES.length); };
   const nextGame = () => { resetToIdle(); setGameIdx(i => (i + 1) % GAMES.length); };
 
@@ -456,6 +522,16 @@ export function SnakeGame() {
 
   return (
     <>
+      {/* Shared by both layouts; the hover rules below are desktop-only */}
+      <style>{`
+        @keyframes dot-pulse {
+          0%, 100% { opacity: 0.3;  box-shadow: 0 0 2px rgba(59,130,246,0.15); }
+          50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
+        }
+        .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
+        .sheet-dragging, .sheet-dragging .sheet-panel, .sheet-backdrop.sheet-dragging { transition: none !important; }
+      `}</style>
+
       {/* ════════════════════════════════════════════════════════════
           MOBILE — bottom sheet
       ════════════════════════════════════════════════════════════ */}
@@ -467,21 +543,33 @@ export function SnakeGame() {
           )}
 
           {/* Backdrop */}
-          {open && (
-            <div
-              onClick={handleClose}
-              style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
-            />
-          )}
+          {/* Stays mounted so it can fade with the sheet; visibility is delayed
+              past the fade so the blur layer stops compositing once closed. */}
+          <div
+            ref={backdropRef}
+            className="sheet-backdrop"
+            onClick={handleClose}
+            aria-hidden="true"
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9998,
+              background: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+              opacity: open ? 1 : 0,
+              visibility: open ? 'visible' : 'hidden',
+              pointerEvents: open ? 'auto' : 'none',
+              transition: `opacity ${SHEET_MS}ms ${SHEET_EASE}, visibility 0s linear ${open ? '0s' : `${SHEET_MS}ms`}`,
+            }}
+          />
 
           {/* Bottom sheet */}
-          <div style={{
+          <div ref={sheetRef} style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
             transform: open ? 'translateY(0)' : 'translateY(100%)',
-            transition: 'transform 340ms cubic-bezier(0.4,0,0.2,1)',
+            transition: `transform ${SHEET_MS}ms ${SHEET_EASE}`,
             pointerEvents: open ? 'auto' : 'none',
           }}>
-            <div style={{
+            <div ref={panelRef} className="sheet-panel" style={{
               background: T.panelBg,
               borderTop: `1px solid ${T.panelBorder}`,
               borderLeft: `1px solid ${T.panelBorder}`,
@@ -489,9 +577,18 @@ export function SnakeGame() {
               borderRadius: '16px 16px 0 0',
               maxHeight: '88vh', overflowY: 'auto', scrollbarWidth: 'none',
               boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
+              paddingBottom: 0,
+              transition: `padding-bottom 420ms ${SHEET_SPRING}`,
             }}>
-              {/* Drag handle */}
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+              {/* Drag handle — pointer-only; the toggle button is the accessible equivalent */}
+              <div
+                aria-hidden="true"
+                onPointerDown={onHandleDown}
+                onPointerMove={onHandleMove}
+                onPointerUp={e => endHandleDrag(e)}
+                onPointerCancel={e => endHandleDrag(e, true)}
+                style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px', touchAction: 'none', cursor: 'grab' }}
+              >
                 <div style={{ width: 36, height: 4, borderRadius: 2, background: light ? '#c8cce0' : '#2a3050' }} />
               </div>
               {/* Centre-constrain content on mobile */}
@@ -501,43 +598,59 @@ export function SnakeGame() {
             </div>
           </div>
 
-          {/* Floating trigger — pill when closed, minimal dot-circle when open */}
+          {/* Floating trigger — pill when closed, dot-circle when open */}
           <button
             onClick={() => setOpen(o => !o)}
             aria-label={open ? 'Close games' : 'Open games'}
+            aria-expanded={open}
             className="game-tab"
             style={{
               position: 'fixed',
-              bottom: open ? 8 : 20,
-              right: open ? 8 : 16,
+              bottom: open ? 10 : 20,
+              right: open ? 10 : 16,
               zIndex: 10000,
               pointerEvents: 'auto',
               display: 'flex', flexDirection: 'row', alignItems: 'center',
-              gap: open ? 0 : 6,
-              padding: open ? '8px' : '8px 14px',
+              justifyContent: 'center',
+              gap: open ? 0 : 8,
+              // Explicit height keeps the open state a true circle: the collapsed
+              // label is still in flow and is taller than the dot.
+              boxSizing: 'border-box',
+              height: open ? 40 : 46,
+              padding: open ? '0 14px' : '0 20px',
               background: open ? 'rgba(59,130,246,0.15)' : T.tabBg,
               border: `1px solid ${open ? 'rgba(59,130,246,0.5)' : T.tabBorderColor}`,
               borderRadius: 40, cursor: 'pointer', outline: 'none',
               boxShadow: open ? '0 2px 12px rgba(59,130,246,0.35)' : '0 4px 16px rgba(0,0,0,0.25)',
-              transition: 'all 280ms cubic-bezier(0.4,0,0.2,1)',
+              transition: `padding ${TAB_MS}ms ${TAB_EASE}, gap ${TAB_MS}ms ${TAB_EASE}, height ${TAB_MS}ms ${TAB_EASE}, bottom ${TAB_MS}ms ${TAB_EASE}, right ${TAB_MS}ms ${TAB_EASE}, background 280ms ease, border-color 280ms ease, box-shadow 280ms ease`,
               overflow: 'hidden',
-              width: open ? 36 : undefined,
-              height: open ? 36 : undefined,
-              justifyContent: 'center',
+              WebkitTapHighlightColor: 'transparent',
             }}
           >
             <span className={`game-tab-dot${open ? '' : ' game-tab-dot-pulse'}`} style={{
               display: 'block', flexShrink: 0,
-              width: open ? 10 : 6, height: open ? 10 : 6,
+              width: 10, height: 10,
               borderRadius: '50%',
               background: open ? '#3b82f6' : T.tabDotBase,
               boxShadow: open ? '0 0 10px rgba(59,130,246,0.9)' : '0 0 5px rgba(59,130,246,0.3)',
-              transition: 'all 280ms ease',
+              transition: 'background 280ms ease, box-shadow 280ms ease',
             }} />
-            {!open && <>
-              <span className="game-tab-label" style={{ fontFamily: 'monospace', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.tabLabel, writingMode: 'horizontal-tb', transform: 'none', transition: 'color 300ms' }}>games</span>
-              <span className="game-tab-chevron" style={{ color: T.tabChevron, fontSize: 11, lineHeight: 1, transition: 'transform 300ms ease, color 300ms', transform: 'rotate(-90deg)' }}>‹</span>
-            </>}
+            {/* 0fr/1fr collapses to the label's exact width, which max-width cannot do */}
+            <span style={{
+              display: 'grid',
+              gridTemplateColumns: open ? '0fr' : '1fr',
+              transition: `grid-template-columns ${TAB_MS}ms ${TAB_EASE}`,
+            }}>
+              <span style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                minWidth: 0, overflow: 'hidden',
+                opacity: open ? 0 : 1,
+                transition: `opacity ${open ? 140 : 220}ms ease`,
+              }}>
+                <span className="game-tab-label" style={{ fontFamily: 'monospace', fontSize: 11, letterSpacing: '0.14em', textTransform: 'uppercase', color: T.tabLabel, whiteSpace: 'nowrap', transition: 'color 300ms' }}>games</span>
+                <span className="game-tab-chevron" style={{ color: T.tabChevron, fontSize: 13, lineHeight: 1, transform: 'rotate(-90deg)', transition: 'color 300ms' }}>‹</span>
+              </span>
+            </span>
           </button>
         </>
       )}
@@ -572,7 +685,8 @@ export function SnakeGame() {
         </div>
       </div>
 
-      {/* Hover + animation styles */}
+
+      {/* Hover styles */}
       <style>{`
         .game-tab:hover {
           background: ${light ? '#d8dcee' : '#141c30'} !important;
@@ -587,11 +701,6 @@ export function SnakeGame() {
           background: #3b82f6 !important;
           box-shadow: 0 0 10px rgba(59,130,246,0.9) !important;
         }
-        @keyframes dot-pulse {
-          0%, 100% { opacity: 0.3;  box-shadow: 0 0 2px rgba(59,130,246,0.15); }
-          50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
-        }
-        .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
       `}</style>
 
       {/* ── Collapsed tab ── */}
