@@ -153,7 +153,7 @@
       "description": "Task management platform with automated background cron schedulers, dynamic real-time theme shifts, and custom email/in-app notification alerts for mission-critical deadlines.",
       "tags": ["Angular", "Spring Boot", "Java", "JMS", "PostgreSQL"],
       "clientText": "Self Project",
-      "isPrivate: true": true
+      "isPrivate": true
     },
     {
       "id": "ic-engine-carbon-capture-research",

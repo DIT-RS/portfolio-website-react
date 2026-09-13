@@ -41,6 +41,22 @@ export const setCachedContent = (content: PortfolioContent) => {
   localStorage.setItem(LOCAL_CONTENT_KEY, JSON.stringify(content));
 };
 
+// atob yields one char per byte, so multi-byte UTF-8 must be re-decoded.
+const decodeBase64Utf8 = (base64: string): string => {
+  const binary = atob(base64.replace(/\s/g, ''));
+  const bytes = Uint8Array.from(binary, (ch) => ch.charCodeAt(0));
+  return new TextDecoder('utf-8').decode(bytes);
+};
+
+const encodeBase64Utf8 = (text: string): string => {
+  const bytes = new TextEncoder().encode(text);
+  let binary = '';
+  bytes.forEach((b) => {
+    binary += String.fromCharCode(b);
+  });
+  return btoa(binary);
+};
+
 /**
  * Fetch portfolio-data.json from GitHub repository using the Contents API
  */
@@ -60,8 +76,7 @@ export const fetchContentFromGitHub = async (config: GitHubConfig): Promise<{ co
   }
 
   const data = await res.json();
-  const decodedContent = atob(data.content.replace(/\s/g, ''));
-  const parsedContent = JSON.parse(decodedContent);
+  const parsedContent = JSON.parse(decodeBase64Utf8(data.content));
 
   return {
     content: parsedContent,
@@ -144,7 +159,7 @@ export const saveContentToGitHub = async (
 
   const url = `https://api.github.com/repos/${config.owner}/${config.repo}/contents/${config.filePath}`;
   const jsonString = JSON.stringify(newContent, null, 2);
-  const base64Content = btoa(unescape(encodeURIComponent(jsonString)));
+  const base64Content = encodeBase64Utf8(jsonString);
 
   const body: Record<string, unknown> = {
     message: commitMessage,
