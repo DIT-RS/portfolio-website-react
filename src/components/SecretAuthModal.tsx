@@ -48,7 +48,7 @@ export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClos
   const [owner, setOwner] = useState(ghConfig?.owner || 'DitRS');
   const [repo, setRepo] = useState(ghConfig?.repo || 'Portfolio');
   const [branch, setBranch] = useState(ghConfig?.branch || 'main');
-  const [filePath, setFilePath] = useState(ghConfig?.filePath || 'public/portfolio-data.json');
+  const [filePath, setFilePath] = useState(ghConfig?.filePath || 'src/data/portfolio-data.json');
   const [statusMsg, setStatusMsg] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   if (!isOpen) return null;
@@ -67,7 +67,7 @@ export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClos
       owner: owner.trim(),
       repo: repo.trim(),
       branch: branch.trim() || 'main',
-      filePath: filePath.trim() || 'public/portfolio-data.json',
+      filePath: filePath.trim() || 'src/data/portfolio-data.json',
     };
 
     setGhConfig(config);
@@ -256,7 +256,7 @@ export const SecretAuthModal: React.FC<SecretAuthModalProps> = ({ isOpen, onClos
                 type="text"
                 value={filePath}
                 onChange={(e) => setFilePath(e.target.value)}
-                placeholder="public/portfolio-data.json"
+                placeholder="src/data/portfolio-data.json"
                 className="w-full px-3 py-2 rounded-xl bg-[#141622] border border-[#24283c] focus:border-[#3b82f6] text-white text-xs outline-none transition-all"
               />
             </div>
