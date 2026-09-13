@@ -270,6 +270,8 @@ const GAMES = [
 const TAB_MS = 300;
 const TAB_EASE = 'cubic-bezier(0.4,0,0.2,1)';
 
+const SHEET_MS = 340;        // sheet and backdrop must share this to move as one
+const SHEET_EASE = 'cubic-bezier(0.4,0,0.2,1)';
 const SHEET_MAX_PULL = 28;   // ceiling on the upward stretch
 const SHEET_DISMISS_PX = 90;
 const SHEET_FLICK_V = 0.5;   // px/ms
@@ -305,6 +307,7 @@ export function SnakeGame() {
   // update per pointermove would re-render the game on every frame of the drag.
   const sheetRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const dragRef = useRef({ active: false, startY: 0, lastY: 0, lastT: 0, dy: 0, v: 0 });
 
   const onHandleDown = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -312,6 +315,7 @@ export function SnakeGame() {
     d.active = true; d.startY = e.clientY; d.lastY = e.clientY; d.lastT = e.timeStamp; d.dy = 0; d.v = 0;
     e.currentTarget.setPointerCapture(e.pointerId);
     sheetRef.current?.classList.add('sheet-dragging');
+    backdropRef.current?.classList.add('sheet-dragging');
   };
 
   const onHandleMove = (e: ReactPointerEvent<HTMLDivElement>) => {
@@ -324,6 +328,12 @@ export function SnakeGame() {
     const down = d.dy >= 0;
     if (sheetRef.current) sheetRef.current.style.transform = `translateY(${down ? d.dy : 0}px)`;
     if (panelRef.current) panelRef.current.style.paddingBottom = `${down ? 0 : resistPull(-d.dy)}px`;
+    // Dim in step with how far the sheet has been pulled away, or the backdrop
+    // would sit at full strength until the drag ends.
+    if (backdropRef.current && panelRef.current) {
+      const travel = panelRef.current.getBoundingClientRect().height || 1;
+      backdropRef.current.style.opacity = String(down ? Math.max(0, 1 - d.dy / travel) : 1);
+    }
   };
 
   const endHandleDrag = (e: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
@@ -332,10 +342,15 @@ export function SnakeGame() {
     d.active = false;
     if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
     sheetRef.current?.classList.remove('sheet-dragging');
+    backdropRef.current?.classList.remove('sheet-dragging');
     if (panelRef.current) panelRef.current.style.paddingBottom = '0px';
     const dismiss = !cancelled && (d.dy > SHEET_DISMISS_PX || (d.dy > 16 && d.v > SHEET_FLICK_V));
-    if (dismiss) handleClose();
-    else if (sheetRef.current) sheetRef.current.style.transform = 'translateY(0px)';
+    if (dismiss) {
+      handleClose();
+    } else {
+      if (sheetRef.current) sheetRef.current.style.transform = 'translateY(0px)';
+      if (backdropRef.current) backdropRef.current.style.opacity = '1';
+    }
   };
   const prevGame = () => { resetToIdle(); setGameIdx(i => (i - 1 + GAMES.length) % GAMES.length); };
   const nextGame = () => { resetToIdle(); setGameIdx(i => (i + 1) % GAMES.length); };
@@ -514,7 +529,7 @@ export function SnakeGame() {
           50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
         }
         .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
-        .sheet-dragging, .sheet-dragging .sheet-panel { transition: none !important; }
+        .sheet-dragging, .sheet-dragging .sheet-panel, .sheet-backdrop.sheet-dragging { transition: none !important; }
       `}</style>
 
       {/* ════════════════════════════════════════════════════════════
@@ -528,18 +543,30 @@ export function SnakeGame() {
           )}
 
           {/* Backdrop */}
-          {open && (
-            <div
-              onClick={handleClose}
-              style={{ position: 'fixed', inset: 0, zIndex: 9998, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(2px)' }}
-            />
-          )}
+          {/* Stays mounted so it can fade with the sheet; visibility is delayed
+              past the fade so the blur layer stops compositing once closed. */}
+          <div
+            ref={backdropRef}
+            className="sheet-backdrop"
+            onClick={handleClose}
+            aria-hidden="true"
+            style={{
+              position: 'fixed', inset: 0, zIndex: 9998,
+              background: 'rgba(0,0,0,0.5)',
+              backdropFilter: 'blur(2px)',
+              WebkitBackdropFilter: 'blur(2px)',
+              opacity: open ? 1 : 0,
+              visibility: open ? 'visible' : 'hidden',
+              pointerEvents: open ? 'auto' : 'none',
+              transition: `opacity ${SHEET_MS}ms ${SHEET_EASE}, visibility 0s linear ${open ? '0s' : `${SHEET_MS}ms`}`,
+            }}
+          />
 
           {/* Bottom sheet */}
           <div ref={sheetRef} style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
             transform: open ? 'translateY(0)' : 'translateY(100%)',
-            transition: 'transform 340ms cubic-bezier(0.4,0,0.2,1)',
+            transition: `transform ${SHEET_MS}ms ${SHEET_EASE}`,
             pointerEvents: open ? 'auto' : 'none',
           }}>
             <div ref={panelRef} className="sheet-panel" style={{
