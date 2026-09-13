@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import type { PointerEvent as ReactPointerEvent } from 'react';
 import { SudokuGame } from './SudokuGame';
 import { useTheme } from '../context/ThemeContext';
 
@@ -269,6 +270,15 @@ const GAMES = [
 const TAB_MS = 300;
 const TAB_EASE = 'cubic-bezier(0.4,0,0.2,1)';
 
+const SHEET_MAX_PULL = 28;   // ceiling on the upward stretch
+const SHEET_DISMISS_PX = 90;
+const SHEET_FLICK_V = 0.5;   // px/ms
+const SHEET_SPRING = 'cubic-bezier(0.34,1.56,0.64,1)';
+
+// Asymptotic resistance: the sheet never rises past SHEET_MAX_PULL, so pulling
+// up reads as "this does not open further" rather than as a stuck drag.
+const resistPull = (d: number) => (d * SHEET_MAX_PULL) / (d + SHEET_MAX_PULL);
+
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export function SnakeGame() {
@@ -289,6 +299,44 @@ export function SnakeGame() {
   }, []);
 
   const handleClose = () => { setOpen(false); resetToIdle(); };
+
+  // ── Bottom-sheet drag ────────────────────────────────────────────────────────
+  // Written straight to the DOM: the sheet wraps a running canvas, so a state
+  // update per pointermove would re-render the game on every frame of the drag.
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const dragRef = useRef({ active: false, startY: 0, lastY: 0, lastT: 0, dy: 0, v: 0 });
+
+  const onHandleDown = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    d.active = true; d.startY = e.clientY; d.lastY = e.clientY; d.lastT = e.timeStamp; d.dy = 0; d.v = 0;
+    e.currentTarget.setPointerCapture(e.pointerId);
+    sheetRef.current?.classList.add('sheet-dragging');
+  };
+
+  const onHandleMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const d = dragRef.current;
+    if (!d.active) return;
+    const dt = e.timeStamp - d.lastT;
+    if (dt > 0) d.v = (e.clientY - d.lastY) / dt;
+    d.lastY = e.clientY; d.lastT = e.timeStamp;
+    d.dy = e.clientY - d.startY;
+    const down = d.dy >= 0;
+    if (sheetRef.current) sheetRef.current.style.transform = `translateY(${down ? d.dy : 0}px)`;
+    if (panelRef.current) panelRef.current.style.paddingBottom = `${down ? 0 : resistPull(-d.dy)}px`;
+  };
+
+  const endHandleDrag = (e: ReactPointerEvent<HTMLDivElement>, cancelled = false) => {
+    const d = dragRef.current;
+    if (!d.active) return;
+    d.active = false;
+    if (e.currentTarget.hasPointerCapture(e.pointerId)) e.currentTarget.releasePointerCapture(e.pointerId);
+    sheetRef.current?.classList.remove('sheet-dragging');
+    if (panelRef.current) panelRef.current.style.paddingBottom = '0px';
+    const dismiss = !cancelled && (d.dy > SHEET_DISMISS_PX || (d.dy > 16 && d.v > SHEET_FLICK_V));
+    if (dismiss) handleClose();
+    else if (sheetRef.current) sheetRef.current.style.transform = 'translateY(0px)';
+  };
   const prevGame = () => { resetToIdle(); setGameIdx(i => (i - 1 + GAMES.length) % GAMES.length); };
   const nextGame = () => { resetToIdle(); setGameIdx(i => (i + 1) % GAMES.length); };
 
@@ -466,6 +514,7 @@ export function SnakeGame() {
           50%       { opacity: 1;   box-shadow: 0 0 12px rgba(59,130,246,1), 0 0 4px #fff; }
         }
         .game-tab-dot-pulse { animation: dot-pulse 2.0s ease-in-out infinite; }
+        .sheet-dragging, .sheet-dragging .sheet-panel { transition: none !important; }
       `}</style>
 
       {/* ════════════════════════════════════════════════════════════
@@ -487,13 +536,13 @@ export function SnakeGame() {
           )}
 
           {/* Bottom sheet */}
-          <div style={{
+          <div ref={sheetRef} style={{
             position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 9999,
             transform: open ? 'translateY(0)' : 'translateY(100%)',
             transition: 'transform 340ms cubic-bezier(0.4,0,0.2,1)',
             pointerEvents: open ? 'auto' : 'none',
           }}>
-            <div style={{
+            <div ref={panelRef} className="sheet-panel" style={{
               background: T.panelBg,
               borderTop: `1px solid ${T.panelBorder}`,
               borderLeft: `1px solid ${T.panelBorder}`,
@@ -501,9 +550,18 @@ export function SnakeGame() {
               borderRadius: '16px 16px 0 0',
               maxHeight: '88vh', overflowY: 'auto', scrollbarWidth: 'none',
               boxShadow: '0 -8px 40px rgba(0,0,0,0.4)',
+              paddingBottom: 0,
+              transition: `padding-bottom 420ms ${SHEET_SPRING}`,
             }}>
-              {/* Drag handle */}
-              <div style={{ display: 'flex', justifyContent: 'center', padding: '10px 0 4px' }}>
+              {/* Drag handle — pointer-only; the toggle button is the accessible equivalent */}
+              <div
+                aria-hidden="true"
+                onPointerDown={onHandleDown}
+                onPointerMove={onHandleMove}
+                onPointerUp={e => endHandleDrag(e)}
+                onPointerCancel={e => endHandleDrag(e, true)}
+                style={{ display: 'flex', justifyContent: 'center', padding: '12px 0 8px', touchAction: 'none', cursor: 'grab' }}
+              >
                 <div style={{ width: 36, height: 4, borderRadius: 2, background: light ? '#c8cce0' : '#2a3050' }} />
               </div>
               {/* Centre-constrain content on mobile */}
