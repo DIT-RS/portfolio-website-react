@@ -346,12 +346,12 @@ export function SudokuGame({ panelWidth, light = false, active = true }: Props) 
   };
 
   const cellColor = (r: number, c: number): string => {
-    if (status === 'revealed' && !fixed[r][c]) return light ? 'rgba(50,100,200,0.65)' : 'rgba(99,150,224,0.7)';
-    if (fixed[r][c])            return light ? '#2a3a70' : '#c8d0e8';
-    if (isError(r, c) || isWrong(r, c)) return '#e53e3e';
-    if (status === 'solved')    return '#2563eb';
-    if (board[r][c] !== null && board[r][c] === solution[r][c]) return light ? '#1d4ed8' : '#6496e0';
-    return light ? '#4060a8' : '#8898c0';
+    if (status === 'revealed' && !fixed[r][c]) return light ? 'rgba(50,100,200,0.65)' : '#93c5fd';
+    if (fixed[r][c])            return light ? '#2a3a70' : '#cbd5e1';
+    if (isError(r, c) || isWrong(r, c)) return '#ef4444';
+    if (status === 'solved')    return light ? '#2563eb' : '#60a5fa';
+    if (board[r][c] !== null && board[r][c] === solution[r][c]) return light ? '#1d4ed8' : '#60a5fa';
+    return light ? '#4060a8' : '#a5b4fc';
   };
 
   const M = { fontFamily: 'monospace' } as React.CSSProperties;
@@ -370,31 +370,31 @@ export function SudokuGame({ panelWidth, light = false, active = true }: Props) 
   const T = {
     bg:           light ? '#f0f2f8' : '#0d0f1a',
     headerBg:     light ? '#e8eaf4' : '#10121e',
-    headerBorder: light ? '#cdd0e4' : '#1e2235',
-    statusBorder: light ? '#d0d4e8' : '#181c2e',
-    statusMuted:  light ? '#9090b8' : '#2e3a4e',
-    gridBorder:   light ? '#8090c0' : '#3a4a70',
-    cellThin:     light ? '#c8d0e8' : '#1e2440',
-    numpadBorder: light ? '#b8c4e0' : '#2e3a55',
-    numpadColor:  light ? '#2a50c0' : '#7a9ad0',
-    numpadBg:     light ? 'rgba(59,130,246,0.07)' : 'rgba(59,130,246,0.06)',
-    eraseBg:      light ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)',
-    eraseBorder:  light ? '#c0c8e0' : '#2a3350',
-    eraseColor:   light ? '#5060a0' : '#4a6080',
+    headerBorder: light ? '#cdd0e4' : '#222c48',
+    statusBorder: light ? '#d0d4e8' : '#1d2238',
+    statusMuted:  light ? '#9090b8' : '#64748b',
+    gridBorder:   light ? '#8090c0' : '#4e5d7c',
+    cellThin:     light ? '#c8d0e8' : '#1e2544',
+    numpadBorder: light ? '#b8c4e0' : '#2d354f',
+    numpadColor:  light ? '#2a50c0' : '#cbd5e1',
+    numpadBg:     light ? 'rgba(59,130,246,0.07)' : 'rgba(59,130,246,0.12)',
+    eraseBg:      light ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.05)',
+    eraseBorder:  light ? '#c0c8e0' : '#2d354f',
+    eraseColor:   light ? '#5060a0' : '#94a3b8',
     submitColor:  light ? '#1d4ed8' : '#93c5fd',
-    revealBorder: light ? '#c0c8e0' : '#2a3350',
-    revealColor:  light ? '#5060a0' : '#4a6080',
-    hintColor:    light ? '#8090b8' : '#3a4e6a',
-    solvedColor:  light ? '#1d4ed8' : '#3b82f6',
-    revealedColor: light ? '#5060a0' : '#5a7090',
-    newBorder:    light ? '#b8c4e0' : '#2e3a55',
-    newColor:     light ? '#2a50c0' : '#6a90c0',
-    diffInactive: light ? '#b0bcd8' : '#5a7090',
-    diffBorder:   light ? '#c8d0e8' : '#2a3350',
-    refreshColor: light ? '#3050a0' : '#6080c0',
-    refreshBorder: light ? '#b8c4e0' : '#2e3a55',
-    generating:   light ? '#6070a8' : '#4a6080',
-    gridShadow:   light ? '0 0 12px rgba(100,120,200,0.1)' : '0 0 20px rgba(0,0,0,0.5)',
+    revealBorder: light ? '#c0c8e0' : '#2d354f',
+    revealColor:  light ? '#5060a0' : '#94a3b8',
+    hintColor:    light ? '#8090b8' : '#64748b',
+    solvedColor:  light ? '#1d4ed8' : '#60a5fa',
+    revealedColor: light ? '#5060a0' : '#8ba2c0',
+    newBorder:    light ? '#b8c4e0' : '#2d354f',
+    newColor:     light ? '#2a50c0' : '#93c5fd',
+    diffInactive: light ? '#b0bcd8' : '#8ba2c0',
+    diffBorder:   light ? '#c8d0e8' : '#2d354f',
+    refreshColor: light ? '#3050a0' : '#93c5fd',
+    refreshBorder: light ? '#b8c4e0' : '#2d354f',
+    generating:   light ? '#6070a8' : '#64748b',
+    gridShadow:   light ? '0 0 12px rgba(100,120,200,0.1)' : '0 4px 20px rgba(59,130,246,0.12)',
   };
 
   return (
