@@ -200,7 +200,7 @@ function GameCanvas({ snake, food, phase, flash, light }: { snake: Pt[]; food: P
     ctx.clearRect(0, 0, W, H);
 
     // Grid lines
-    ctx.strokeStyle = light ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.028)';
+    ctx.strokeStyle = light ? 'rgba(0,0,0,0.07)' : 'rgba(255,255,255,0.12)';
     ctx.lineWidth = 0.5;
     for (let x = 0; x <= COLS; x++) { ctx.beginPath(); ctx.moveTo(x*CELL,0); ctx.lineTo(x*CELL,H); ctx.stroke(); }
     for (let y = 0; y <= ROWS; y++) { ctx.beginPath(); ctx.moveTo(0,y*CELL); ctx.lineTo(W,y*CELL); ctx.stroke(); }
@@ -221,10 +221,10 @@ function GameCanvas({ snake, food, phase, flash, light }: { snake: Pt[]; food: P
       const dim = phase === 'idle';
       const alpha = light
         ? (dim ? 0.15+(1-t)*0.1 : 0.55+(1-t)*0.35)
-        : (dim ? 0.22+(1-t)*0.18 : 0.6+(1-t)*0.38);
-      const r  = Math.round(59  + t*(20-59));
-      const g2 = Math.round(130 + t*(35-130));
-      const b  = Math.round(246 + t*(70-246));
+        : (dim ? 0.26+(1-t)*0.16 : 0.72+(1-t)*0.26);
+      const r  = light ? Math.round(59  + t*(20-59))  : Math.round(59  + t*(99-59));
+      const g2 = light ? Math.round(130 + t*(35-130)) : Math.round(130 + t*(102-130));
+      const b  = light ? Math.round(246 + t*(70-246)) : Math.round(246 + t*(241-246));
       const pad = 1.5+t*1.5, cr = Math.max(2,CELL/2-pad);
       ctx.fillStyle = `rgba(${r},${g2},${b},${alpha})`;
       ctx.beginPath(); ctx.roundRect(seg.x*CELL+pad,seg.y*CELL+pad,CELL-pad*2,CELL-pad*2,cr); ctx.fill();
@@ -247,10 +247,11 @@ function DPad({ onDir, light, large }: { onDir: (d: Dir) => void; light: boolean
       style={{
         width: sz, height: sz, display: 'flex', alignItems: 'center', justifyContent: 'center',
         borderRadius: large ? 12 : 8,
-        background: light ? '#e8eaf4' : '#151820',
-        border: `1px solid ${light ? '#cdd0e0' : '#252a3a'}`,
-        color: light ? '#6070a0' : '#555d75',
+        background: light ? '#e8eaf4' : '#1e2335',
+        border: `1px solid ${light ? '#cdd0e0' : '#2d3748'}`,
+        color: light ? '#6070a0' : '#93c5fd',
         fontSize: large ? 16 : 10, cursor: 'pointer', userSelect: 'none',
+        boxShadow: light ? 'none' : '0 2px 6px rgba(0,0,0,0.3)',
       }}
     >{lbl}</button>
   );
@@ -265,7 +266,7 @@ function DPad({ onDir, light, large }: { onDir: (d: Dir) => void; light: boolean
 // ─── Game registry ────────────────────────────────────────────────────────────
 
 const GAMES = [
-  { id: 'snake',  label: 'Snake',  pw: COLS * CELL },
+  { id: 'snake',  label: 'Snake',  pw: 244 },
   { id: 'sudoku', label: 'Sudoku', pw: 236 },
 ];
 
@@ -374,31 +375,33 @@ export function SnakeGame() {
   const T = {
     panelBg:      light ? '#f0f2f8' : '#0d0f1a',
     headerBg:     light ? '#e8eaf4' : '#10121e',
-    headerBorder: light ? '#cdd0e4' : '#1e2235',
-    panelBorder:  isPlaying ? 'rgba(59,130,246,0.4)' : (light ? 'rgba(59,130,246,0.25)' : 'rgba(27,30,44,0.9)'),
+    headerBorder: light ? '#cdd0e4' : '#222c48',
+    panelBorder:  isPlaying
+      ? 'rgba(59,130,246,0.65)'
+      : (light ? 'rgba(59,130,246,0.25)' : 'rgba(147,197,253,0.3)'),
     panelShadow:  isPlaying
-      ? '-8px 0 32px -4px rgba(59,130,246,0.22)'
-      : (light ? '-6px 0 24px -4px rgba(100,120,180,0.18)' : '-6px 0 24px -4px rgba(0,0,0,0.7)'),
-    arrowBg:      light ? 'rgba(59,130,246,0.07)' : 'rgba(59,130,246,0.06)',
-    arrowBorder:  light ? '#b8c4e0' : '#2e3a55',
-    arrowColor:   GAMES.length > 1 ? (light ? '#4060a0' : '#6080c0') : (light ? '#b0bcd8' : '#2e3a55'),
-    closeBorder:  light ? '#c0cadf' : '#2e3a55',
-    closeColor:   light ? '#6070a0' : '#5a6a90',
+      ? (light ? '-8px 0 32px -4px rgba(59,130,246,0.18)' : '-8px 0 32px -4px rgba(59,130,246,0.32)')
+      : (light ? '-6px 0 24px -4px rgba(100,120,180,0.18)' : '-10px 0 40px -4px rgba(0,0,0,0.85)'),
+    arrowBg:      light ? 'rgba(59,130,246,0.07)' : 'rgba(59,130,246,0.12)',
+    arrowBorder:  light ? '#b8c4e0' : '#334155',
+    arrowColor:   GAMES.length > 1 ? (light ? '#4060a0' : '#93c5fd') : (light ? '#b0bcd8' : '#334155'),
+    closeBorder:  light ? '#c0cadf' : '#334155',
+    closeColor:   light ? '#6070a0' : '#94a3b8',
     labelColor:   light ? '#5060a0' : '#7a90c0',
-    dotInactive:  light ? '#a0b4d8' : '#2a3a60',
+    dotInactive:  light ? '#a0b4d8' : '#3b4c70',
     footerBg:     light ? '#e8eaf4' : '#0c0d14',
     footerBorder: light ? '#cdd0e0' : '#141720',
-    kbdBg:        light ? '#dde0ee' : '#0e1018',
-    kbdBorder:    light ? '#c0c8df' : '#181c28',
-    kbdColor:     light ? '#5060a0' : '#2e3650',
-    scoreLabel:   light ? '#8090b8' : '#3b4c70',
+    kbdBg:        light ? '#dde0ee' : '#131622',
+    kbdBorder:    light ? '#c0c8df' : '#22293a',
+    kbdColor:     light ? '#5060a0' : '#cbd5e1',
+    scoreLabel:   light ? '#8090b8' : '#4e5d7c',
     scoreValue:   light ? '#2a50c0' : '#7aa2e0',
-    spdLabel:     light ? '#9090b0' : '#2e3a55',
+    spdLabel:     light ? '#9090b0' : '#4e5d7c',
     tabBg:        open ? (light ? '#dde2f0' : '#111828') : (light ? '#e8eaf4' : '#0e1220'),
     tabBorderColor: open ? 'rgba(59,130,246,0.55)' : (light ? 'rgba(59,130,246,0.3)' : 'rgba(59,130,246,0.3)'),
-    tabChevron:   open ? (light ? '#3060b0' : '#7aa2e0') : (light ? '#5070a8' : '#5a7ab8'),
+    tabChevron:   open ? (light ? '#3060b0' : '#93c5fd') : (light ? '#5070a8' : '#8ba2c0'),
     tabDotBase:   open ? '#3b82f6' : (light ? '#6090cc' : '#4060a0'),
-    tabLabel:     open ? (light ? '#3060b0' : '#6a90d0') : (light ? '#5878b0' : '#4a6aaa'),
+    tabLabel:     open ? (light ? '#3060b0' : '#93c5fd') : (light ? '#5878b0' : '#8ba2c0'),
   };
 
   // ── Shared panel content (same for both layouts) ─────────────────────────────
@@ -434,15 +437,15 @@ export function SnakeGame() {
           {/* Canvas wrapper — centres canvas and adds a visible border on mobile */}
           <div style={{
             display: 'flex', justifyContent: 'center',
-            padding: isMobile ? '8px 0' : 0,
-            background: isMobile ? (light ? '#e4e6f2' : '#080910') : undefined,
+            padding: '10px 0',
+            background: light ? '#e4e6f2' : '#080910',
           }}>
           <div style={{
             position: 'relative',
-            border: isMobile ? `2px solid ${light ? '#8090c0' : '#2a3a60'}` : undefined,
-            borderRadius: isMobile ? 8 : 0,
+            border: `2px solid ${light ? '#8090c0' : '#3b82f6'}`,
+            borderRadius: 8,
             overflow: 'hidden',
-            boxShadow: isMobile ? (light ? '0 2px 16px rgba(80,100,180,0.15)' : '0 2px 20px rgba(0,0,0,0.6)') : undefined,
+            boxShadow: light ? '0 2px 12px rgba(80,100,180,0.15)' : '0 4px 20px rgba(59,130,246,0.22)',
           }}>
             <GameCanvas snake={snake} food={food} phase={phase} flash={flash} light={light} />
             {phase === 'idle' && (
@@ -467,18 +470,18 @@ export function SnakeGame() {
                     <span style={{ fontFamily: 'monospace', fontSize: 10, fontWeight: 700, color: light ? '#b45309' : '#fbbf24', textTransform: 'uppercase', letterSpacing: '0.14em', textShadow: light ? 'none' : '0 0 12px rgba(251,191,36,0.7)' }}>new best!</span>
                   </div>
                 ) : (
-                  <span style={{ fontFamily: 'monospace', fontSize: 9, color: 'rgba(248,113,113,0.85)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>game over</span>
+                  <span style={{ fontFamily: 'monospace', fontSize: 9, color: '#f87171', textTransform: 'uppercase', letterSpacing: '0.1em', fontWeight: 600 }}>game over</span>
                 )}
                 <span className={newRecord && score > 0 ? 'snake-new-best' : ''} style={{ fontFamily: 'Syne, sans-serif', fontWeight: 800, fontSize: 40, color: newRecord && score > 0 ? (light ? '#b45309' : '#fbbf24') : (light ? '#1a2a60' : '#fff'), lineHeight: 1, textShadow: newRecord && score > 0 && !light ? '0 0 24px rgba(251,191,36,0.5)' : 'none' }}>{score}</span>
-                <span style={{ fontFamily: 'monospace', fontSize: 9, color: light ? '#8090b8' : '#3b4060' }}>pts</span>
+                <span style={{ fontFamily: 'monospace', fontSize: 9, color: light ? '#8090b8' : '#cbd5e1' }}>pts</span>
                 {highScore > 0 && (
-                  <span style={{ fontFamily: 'monospace', fontSize: 8, color: light ? '#7080a8' : '#4a5878', letterSpacing: '0.08em' }}>
-                    best <span style={{ color: newRecord && score > 0 ? (light ? '#b45309' : '#fbbf24') : (light ? '#3060a0' : '#6080b0'), fontWeight: 700 }}>{highScore}</span>
+                  <span style={{ fontFamily: 'monospace', fontSize: 8, color: light ? '#7080a8' : '#94a3b8', letterSpacing: '0.08em' }}>
+                    best <span style={{ color: newRecord && score > 0 ? (light ? '#b45309' : '#fbbf24') : (light ? '#3060a0' : '#93c5fd'), fontWeight: 700 }}>{highScore}</span>
                   </span>
                 )}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4, width: '100%', padding: '0 20px' }}>
                   <button onClick={startGame} style={{ fontFamily: 'monospace', padding: '5px 0', borderRadius: 8, fontSize: 9, background: 'rgba(59,130,246,0.1)', border: '1px solid rgba(59,130,246,0.28)', color: light ? '#2050c0' : '#93c5fd', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>retry</button>
-                  <button onClick={handleClose} style={{ fontFamily: 'monospace', padding: '5px 0', borderRadius: 8, fontSize: 9, background: light ? '#dde0ee' : '#13151e', border: `1px solid ${light ? '#c0cadf' : '#1e2232'}`, color: light ? '#7080a8' : '#3b4060', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>exit</button>
+                  <button onClick={handleClose} style={{ fontFamily: 'monospace', padding: '5px 0', borderRadius: 8, fontSize: 9, background: light ? '#dde0ee' : '#1d2132', border: `1px solid ${light ? '#c0cadf' : '#2d354f'}`, color: light ? '#7080a8' : '#94a3b8', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em' }}>exit</button>
                 </div>
               </div>
             )}
