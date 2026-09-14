@@ -112,6 +112,8 @@ function useSnake() {
 
   const startGame = useCallback(() => {
     rP.current = 'countdown'; setPhase('countdown'); setCountdown(3);
+    setNewRecord(false);
+    setScore(0);
     let c = 3;
     const id = setInterval(() => {
       c--; setCountdown(c);
